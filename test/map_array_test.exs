@@ -234,6 +234,34 @@ defmodule MapArrayTest do
     end
   end
 
+  describe "map_with_index/2" do
+    test "maps through an array from beginning to end" do
+      array = MapArray.new([2, 4, 6, 8, 10])
+
+      assert MapArray.map_with_index(array, fn n, i -> i * n end) == [
+               0,
+               4,
+               12,
+               24,
+               40
+             ]
+    end
+  end
+
+  describe "reverse_map_with_index/2" do
+    test "maps through an array from beginning to end" do
+      array = MapArray.new([2, 4, 6, 8, 10])
+
+      assert MapArray.reverse_map_with_index(array, fn n, i -> i * n end) == [
+               40,
+               24,
+               12,
+               4,
+               0
+             ]
+    end
+  end
+
   describe "reverse_map/2" do
     test "maps through an array from end to beginning" do
       array = MapArray.new([2, 4, 6, 8, 10])

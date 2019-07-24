@@ -85,6 +85,18 @@ defmodule MapArray do
     |> Enum.take(map_size(map))
   end
 
+  @spec map_with_index(map, (any, index -> any)) :: [any]
+  def map_with_index(map, mapper) when is_map(map) and is_function(mapper, 2) do
+    0
+    |> iter_up()
+    |> Stream.map(fn i ->
+      map
+      |> Map.fetch!(i)
+      |> mapper.(i)
+    end)
+    |> Enum.take(map_size(map))
+  end
+
   @spec slice(any, Range.t()) :: [any]
   def slice(map, a..b) do
     a..b
@@ -104,6 +116,20 @@ defmodule MapArray do
       map
       |> Map.fetch!(i)
       |> mapper.()
+    end)
+    |> Enum.take(map_size(map))
+  end
+
+  @spec reverse_map_with_index(map, (any, index -> any)) :: [any]
+  def reverse_map_with_index(map, mapper) when is_map(map) and is_function(mapper, 2) do
+    n = map_size(map) - 1
+
+    n
+    |> iter_down()
+    |> Stream.map(fn i ->
+      map
+      |> Map.fetch!(i)
+      |> mapper.(i)
     end)
     |> Enum.take(map_size(map))
   end

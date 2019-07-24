@@ -220,7 +220,7 @@ defmodule MapArrayTest do
     end
   end
 
-  describe "map/2" do
+  describe "map/2 with mapper/1" do
     test "maps through an array from beginning to end" do
       array = MapArray.new([2, 4, 6, 8, 10])
 
@@ -234,11 +234,11 @@ defmodule MapArrayTest do
     end
   end
 
-  describe "map_with_index/2" do
+  describe "map/2 with mapper/2" do
     test "maps through an array from beginning to end" do
       array = MapArray.new([2, 4, 6, 8, 10])
 
-      assert MapArray.map_with_index(array, fn n, i -> i * n end) == [
+      assert MapArray.map(array, fn n, i -> i * n end) == [
                0,
                4,
                12,
@@ -248,11 +248,11 @@ defmodule MapArrayTest do
     end
   end
 
-  describe "reverse_map_with_index/2" do
+  describe "reverse_map/2 with mapper/2" do
     test "maps through an array from beginning to end" do
       array = MapArray.new([2, 4, 6, 8, 10])
 
-      assert MapArray.reverse_map_with_index(array, fn n, i -> i * n end) == [
+      assert MapArray.reverse_map(array, fn n, i -> i * n end) == [
                40,
                24,
                12,
@@ -262,7 +262,7 @@ defmodule MapArrayTest do
     end
   end
 
-  describe "reverse_map/2" do
+  describe "reverse_map/2 with mapper/1" do
     test "maps through an array from end to beginning" do
       array = MapArray.new([2, 4, 6, 8, 10])
 
@@ -291,6 +291,50 @@ defmodule MapArrayTest do
       array = MapArray.new(items)
       result = MapArray.to_reversed_list(array)
       assert result == Enum.reverse(items)
+    end
+  end
+
+  describe "reduce/3 with reducer/2" do
+    test "has the same result as Enum.reduce/3" do
+      reducer = fn item, acc ->
+        [item * item | acc]
+      end
+
+      array = MapArray.new(1..5)
+      assert MapArray.reduce(array, [], reducer) == [25, 16, 9, 4, 1]
+    end
+  end
+
+  describe "reduce/3 with reducer/3" do
+    test "includes the item, acc, and index" do
+      reducer = fn item, acc, i ->
+        [item * item + i | acc]
+      end
+
+      array = MapArray.new(1..5)
+      assert MapArray.reduce(array, [], reducer) == [29, 19, 11, 5, 1]
+    end
+  end
+
+  describe "reverse_reduce/3 with reducer/2" do
+    test "has the same result as Enum.reduce/3" do
+      reducer = fn item, acc ->
+        [item * item | acc]
+      end
+
+      array = MapArray.new(1..5)
+      assert MapArray.reverse_reduce(array, [], reducer) == [1, 4, 9, 16, 25]
+    end
+  end
+
+  describe "reverse_reduce/3 with reducer/3" do
+    test "includes the item, acc, and index" do
+      reducer = fn item, acc, i ->
+        [item * item + i | acc]
+      end
+
+      array = MapArray.new(1..5)
+      assert MapArray.reverse_reduce(array, [], reducer) == [1, 5, 11, 19, 29]
     end
   end
 end

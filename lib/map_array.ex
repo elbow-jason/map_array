@@ -73,28 +73,82 @@ defmodule MapArray do
   @spec len(map) :: non_neg_integer()
   def len(map), do: map_size(map)
 
-  @spec map(map, (any -> any)) :: [any]
-  def map(map, mapper) when is_map(map) and is_function(mapper, 1) do
+  @spec max_index(t()) :: non_neg_integer()
+  def max_index(map), do: map_size(map) - 1
+
+  @type reducer2 :: (any, any -> any)
+  @type reducer3 :: (any, any, index -> any)
+
+  @spec reduce(t(), any, reducer2 | reducer3) :: any
+  def reduce(map, initial_state, reducer) when is_function(reducer) do
     0
     |> iter_up()
+    |> do_reduce(map, initial_state, reducer)
+  end
+
+  @spec reverse_reduce(t(), any, reducer2 | reducer3) :: any
+  def reverse_reduce(map, initial_state, reducer) when is_function(reducer) do
+    map
+    |> max_index()
+    |> iter_down()
+    |> do_reduce(map, initial_state, reducer)
+  end
+
+  defp do_reduce(iter, map, initial_state, reducer) do
+    Enum.reduce_while(iter, initial_state, fn i, acc ->
+      case Map.fetch(map, i) do
+        {:ok, value} ->
+          {:cont, apply_reducer(value, i, acc, reducer)}
+
+        :error ->
+          {:halt, acc}
+      end
+    end)
+  end
+
+  defp apply_reducer(value, i, acc, reducer) do
+    cond do
+      is_function(reducer, 2) ->
+        reducer.(value, acc)
+
+      is_function(reducer, 3) ->
+        reducer.(value, acc, i)
+    end
+  end
+
+  @type mapper1 :: (any -> any)
+  @type mapper2 :: (any, index -> any)
+
+  @spec map(map, mapper1 | mapper2) :: [any]
+  def map(map, mapper) when is_map(map) and is_function(mapper) do
+    0
+    |> iter_up()
+    |> do_map(map, mapper)
+  end
+
+  @spec reverse_map(map, (any -> any)) :: [any]
+  def reverse_map(map, mapper) when is_map(map) and is_function(mapper) do
+    map
+    |> max_index()
+    |> iter_down()
+    |> do_map(map, mapper)
+  end
+
+  defp do_map(iter, map, mapper) do
+    iter
     |> Stream.map(fn i ->
-      map
-      |> Map.fetch!(i)
-      |> mapper.()
+      apply_mapper(map, i, mapper)
     end)
     |> Enum.take(map_size(map))
   end
 
-  @spec map_with_index(map, (any, index -> any)) :: [any]
-  def map_with_index(map, mapper) when is_map(map) and is_function(mapper, 2) do
-    0
-    |> iter_up()
-    |> Stream.map(fn i ->
-      map
-      |> Map.fetch!(i)
-      |> mapper.(i)
-    end)
-    |> Enum.take(map_size(map))
+  defp apply_mapper(map, i, mapper) do
+    value = Map.fetch!(map, i)
+
+    cond do
+      is_function(mapper, 1) -> mapper.(value)
+      is_function(mapper, 2) -> mapper.(value, i)
+    end
   end
 
   @spec slice(any, Range.t()) :: [any]
@@ -104,34 +158,6 @@ defmodule MapArray do
     |> Stream.filter(fn item -> match?({:ok, _}, item) end)
     |> Stream.map(fn {:ok, value} -> value end)
     |> Enum.into([])
-  end
-
-  @spec reverse_map(map, (any -> any)) :: [any]
-  def reverse_map(map, mapper) when is_map(map) and is_function(mapper, 1) do
-    n = map_size(map) - 1
-
-    n
-    |> iter_down()
-    |> Stream.map(fn i ->
-      map
-      |> Map.fetch!(i)
-      |> mapper.()
-    end)
-    |> Enum.take(map_size(map))
-  end
-
-  @spec reverse_map_with_index(map, (any, index -> any)) :: [any]
-  def reverse_map_with_index(map, mapper) when is_map(map) and is_function(mapper, 2) do
-    n = map_size(map) - 1
-
-    n
-    |> iter_down()
-    |> Stream.map(fn i ->
-      map
-      |> Map.fetch!(i)
-      |> mapper.(i)
-    end)
-    |> Enum.take(map_size(map))
   end
 
   @spec to_list(map) :: [any]

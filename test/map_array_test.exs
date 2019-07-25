@@ -100,6 +100,11 @@ defmodule MapArrayTest do
     test "returns :error for no match", %{array: array} do
       assert :error == MapArray.seek_index_up(array, fn item -> item == :not_in_array end)
     end
+
+    test "can handle non-boolean returning matcher", %{array: array} do
+      ident = fn item -> item end
+      assert {:ok, 0} == MapArray.seek_index_up(array, ident)
+    end
   end
 
   describe "seek_index_up/3" do
@@ -116,6 +121,11 @@ defmodule MapArrayTest do
     test "returns :error for no match from the given index", %{nums: nums} do
       assert :error == MapArray.seek_index_up(nums, 4, &is_atom/1)
     end
+
+    test "can handle non-boolean returning matcher", %{array: array} do
+      ident = fn item -> item end
+      assert {:ok, 1} == MapArray.seek_index_up(array, 1, ident)
+    end
   end
 
   describe "seek_up/2" do
@@ -128,7 +138,12 @@ defmodule MapArrayTest do
     end
 
     test "returns :error for no match", %{array: array} do
-      assert :error == MapArray.seek_up(array, 1, &is_float/1)
+      assert :error == MapArray.seek_up(array, &is_float/1)
+    end
+
+    test "can handle non-boolean returning matcher", %{array: array} do
+      ident = fn item -> item end
+      assert {:ok, :zero} == MapArray.seek_up(array, ident)
     end
   end
 
@@ -144,6 +159,11 @@ defmodule MapArrayTest do
       is_even? = fn item -> item in [:zero, :two, :four] end
       assert :error == MapArray.seek_up(array, 3, is_even?)
     end
+
+    test "can handle non-boolean returning matcher", %{array: array} do
+      ident = fn item -> item end
+      assert {:ok, :one} == MapArray.seek_up(array, 1, ident)
+    end
   end
 
   describe "seek_index_down/2" do
@@ -154,6 +174,11 @@ defmodule MapArrayTest do
 
     test "returns :error for no match", %{array: array} do
       assert :error == MapArray.seek_index_down(array, fn _ -> false end)
+    end
+
+    test "can handle non-boolean returning matcher", %{array: array} do
+      ident = fn item -> item end
+      assert {:ok, 2} == MapArray.seek_index_down(array, ident)
     end
   end
 
@@ -173,6 +198,11 @@ defmodule MapArrayTest do
       assert MapArray.len(array) == 3
       assert :error == MapArray.seek_index_down(array, 22, fn _ -> true end)
     end
+
+    test "can handle non-boolean returning matcher", %{array: array} do
+      ident = fn item -> item end
+      assert {:ok, 1} == MapArray.seek_index_down(array, 1, ident)
+    end
   end
 
   describe "seek_down/2" do
@@ -186,6 +216,11 @@ defmodule MapArrayTest do
     test "returns :error for no match", %{array: array} do
       assert :error == MapArray.seek_down(array, fn _ -> false end)
     end
+
+    test "can handle non-boolean returning matcher", %{array: array} do
+      ident = fn item -> item end
+      assert {:ok, :two} == MapArray.seek_down(array, ident)
+    end
   end
 
   describe "seek_down/3" do
@@ -198,6 +233,11 @@ defmodule MapArrayTest do
 
     test "returns :error for no match", %{array: array} do
       assert :error == MapArray.seek_index_down(array, 1, fn _ -> false end)
+    end
+
+    test "can handle non-boolean returning matcher", %{array: array} do
+      ident = fn item -> item end
+      assert {:ok, :one} == MapArray.seek_down(array, 1, ident)
     end
   end
 

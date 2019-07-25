@@ -192,7 +192,7 @@ defmodule MapArray do
   defp do_get_index(map, i, matcher) do
     with(
       {:ok, item} <- Map.fetch(map, i),
-      {:match?, true} <- {:match?, matcher.(item)}
+      {:match?, true} <- {:match?, item |> matcher.() |> to_boolean()}
     ) do
       {:halt, i}
     else
@@ -203,4 +203,8 @@ defmodule MapArray do
         {:cont, nil}
     end
   end
+
+  defp to_boolean(nil), do: false
+  defp to_boolean(false), do: false
+  defp to_boolean(_), do: true
 end

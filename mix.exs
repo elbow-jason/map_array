@@ -38,7 +38,7 @@ defmodule MapArray.MixProject do
       # This option is only needed when you don't want to use the OTP application name
       name: "map_array",
       # These are the default files included in the package
-      files: ~w(lib .formatter.exs mix.exs README.md LICENSE CHANGELOG.md),
+      files: ~w(lib .formatter.exs mix.exs README.md LICENSE),
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/elbow-jason/map_array"}
     ]
